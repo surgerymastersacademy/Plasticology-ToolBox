@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Plasticology Online Companion</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Canvg is required to render SVG to Canvas for the print view -->
-    <script src="https://cdn.jsdelivr.net/npm/canvg@4.0.1/lib/umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvg/dist/browser/canvg.min.js"></script>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -40,9 +39,9 @@
         .tab.active { background-color: var(--primary-color); color: white; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        .body-diagram path { cursor: pointer; stroke: #6B7280; stroke-width: 0.5; transition: fill 0.2s ease-in-out; fill: #E5E7EB; }
+        .body-diagram path { cursor: pointer; stroke: #374151; stroke-width: 1; transition: fill 0.2s ease-in-out; fill: #f3f4f6; }
         .body-diagram path:hover { stroke: var(--primary-color); stroke-width: 1.5; }
-        .body-diagram text { font-size: 8px; font-weight: bold; fill: #1F2937; text-anchor: middle; pointer-events: none; }
+        .body-diagram text { font-size: 10px; font-weight: 600; fill: #1F2937; text-anchor: middle; pointer-events: none; }
         .color-box { transition: all 0.2s ease-in-out; border: 2px solid transparent; }
         .color-box.selected { transform: scale(1.15); box-shadow: 0 0 0 4px var(--primary-color); border-color: white; }
         .input-group { display: flex; flex-direction: column; }
@@ -66,9 +65,24 @@
         .bg-degree-1st { background-color: var(--degree-1st-color); }
         .bg-degree-2nd { background-color: var(--degree-2nd-color); }
         .bg-degree-3rd { background-color: var(--degree-3rd-color); }
-        #generatePdfBtn:disabled {
-            background-color: #9ca3af;
-            cursor: not-allowed;
+
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .printable-area, .printable-area * {
+                visibility: visible;
+            }
+            .printable-area {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                padding: 1rem;
+            }
+            .no-print {
+                display: none !important;
+            }
         }
     </style>
 </head>
@@ -177,12 +191,35 @@
             <button id="close-error-modal" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg">إغلاق</button>
         </div>
     </div>
-
-    <script id="pdf-libs">
-        // Inlined jsPDF, canvg, and jspdf-autotable libraries will be injected here by the main script
-        // This ensures they are available immediately without external network requests.
-    </script>
     
+    <!-- Firebase SDKs -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+        
+        // Your web app's Firebase configuration
+        // IMPORTANT: Replace with your actual Firebase config
+        const firebaseConfig = {
+          apiKey: "YOUR_API_KEY",
+          authDomain: "YOUR_AUTH_DOMAIN",
+          projectId: "YOUR_PROJECT_ID",
+          storageBucket: "YOUR_STORAGE_BUCKET",
+          messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+          appId: "YOUR_APP_ID"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        
+        // Make db accessible globally for other scripts
+        window.firebaseDB = db;
+        window.firebaseCollection = collection;
+        window.firebaseAddDoc = addDoc;
+
+    </script>
+
     <script>
     // Main app logic encapsulated
     (() => {
@@ -305,7 +342,6 @@
                 </nav>
             </div>
             <div class="py-4 bg-white rounded-b-xl shadow-lg flex justify-end space-x-4 rtl:space-x-reverse px-6 border-b mb-4">
-                <button id="generatePdfBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg" data-translate-key="export_pdf_btn">تصدير PDF</button>
                 <button id="resetBtn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg" data-translate-key="reset_btn">إعادة تعيين الكل</button>
             </div>
             <div class="bg-white p-6 rounded-xl shadow-lg">
@@ -394,57 +430,65 @@
                     </div>
                 </div>
                 <div id="tab-content-referral" class="tab-content">
-                     <h3 class="font-bold text-xl text-gray-800 border-b pb-2 mb-4" data-translate-key="ref_form_title">نموذج تقرير الإحالة</h3>
-                     <div id="referral-form" class="space-y-6">
-                        <fieldset class="border p-4 rounded-lg">
-                            <legend class="px-2 font-bold" data-translate-key="ref_patient_info">بيانات المريض</legend>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div class="input-group"><label data-translate-key="ref_patient_name">اسم المريض الكامل</label><input type="text" id="ref-patient-name"></div>
-                                <div class="input-group"><label data-translate-key="ref_medical_number">الرقم الطبي</label><input type="text" id="ref-medical-number"></div>
-                                <div class="input-group"><label data-translate-key="ref_sex">الجنس</label><select id="ref-sex"><option value="male" data-translate-key="sex_male">ذكر</option><option value="female" data-translate-key="sex_female">أنثى</option></select></div>
-                            </div>
-                        </fieldset>
-                        <fieldset class="border p-4 rounded-lg">
-                            <legend class="px-2 font-bold" data-translate-key="ref_history_title">التاريخ المرضي</legend>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div class="input-group"><label data-translate-key="ref_medical_history">تاريخ مرضي سابق</label><textarea id="ref-medical-history" rows="2"></textarea></div>
-                                <div class="input-group"><label data-translate-key="ref_medications">الأدوية الحالية</label><textarea id="ref-medications" rows="2"></textarea></div>
-                                <div class="input-group"><label data-translate-key="ref_allergy">الحساسية</label><textarea id="ref-allergy" rows="2"></textarea></div>
-                                <div class="input-group"><label data-translate-key="ref_last_meal">آخر وجبة</label><input type="text" id="ref-last-meal"></div>
-                            </div>
-                        </fieldset>
-                        <fieldset class="border p-4 rounded-lg">
-                            <legend class="px-2 font-bold" data-translate-key="ref_burn_event_title">تفاصيل حدث الحرق</legend>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div class="input-group"><label data-translate-key="ref_burn_location">مكان الحرق</label><select id="ref-burn-location"><option value="open" data-translate-key="ref_location_open">مكان مفتوح</option><option value="closed" data-translate-key="ref_location_closed">مكان مغلق</option></select></div>
-                                <div class="input-group"><label data-translate-key="ref_associated_injuries">إصابات مصاحبة</label><textarea id="ref-associated-injuries" rows="2"></textarea></div>
-                            </div>
-                        </fieldset>
-                        <fieldset class="border p-4 rounded-lg">
-                            <legend class="px-2 font-bold" data-translate-key="ref_inhalation_title">علامات الاشتباه في حرق استنشاقي</legend>
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                <label class="flex items-center"><input type="checkbox" id="ref-facial-burns" class="ml-2 rtl:ml-0 rtl:mr-2 w-4 h-4"><span data-translate-key="ref_facial_burns">حروق بالوجه</span></label>
-                                <label class="flex items-center"><input type="checkbox" id="ref-singed-hairs" class="ml-2 rtl:ml-0 rtl:mr-2 w-4 h-4"><span data-translate-key="ref_singed_hairs">شعر أنف محروق</span></label>
-                                <label class="flex items-center"><input type="checkbox" id="ref-soot" class="ml-2 rtl:ml-0 rtl:mr-2 w-4 h-4"><span data-translate-key="ref_soot">سخام في مجرى الهواء</span></label>
-                                <label class="flex items-center"><input type="checkbox" id="ref-hoarseness" class="ml-2 rtl:ml-0 rtl:mr-2 w-4 h-4"><span data-translate-key="ref_hoarseness">بحة في الصوت</span></label>
-                            </div>
-                        </fieldset>
-                         <fieldset class="border p-4 rounded-lg">
-                            <legend class="px-2 font-bold" data-translate-key="ref_management_title">الإجراءات الأولية</legend>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <label class="flex items-center"><input type="checkbox" id="ref-iv-line" class="ml-2 rtl:ml-0 rtl:mr-2 w-4 h-4"><span data-translate-key="ref_iv_line">تركيب خط وريدي</span></label>
-                                <label class="flex items-center"><input type="checkbox" id="ref-catheter" class="ml-2 rtl:ml-0 rtl:mr-2 w-4 h-4"><span data-translate-key="ref_catheter">تركيب قسطرة بولية</span></label>
-                                <div class="input-group"><label data-translate-key="ref_analgesia">المسكنات المعطاة</label><input type="text" id="ref-analgesia"></div>
-                                <div class="input-group"><label data-translate-key="ref_escharotomy">موقع بضع الخشارة (Escharotomy)</label><input type="text" id="ref-escharotomy"></div>
-                            </div>
-                        </fieldset>
-                         <fieldset class="border p-4 rounded-lg">
-                            <legend class="px-2 font-bold" data-translate-key="ref_provider_info">بيانات جهة التحويل</legend>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div class="input-group"><label data-translate-key="ref_hospital_name">اسم المستشفى</label><input type="text" id="ref-hospital-name"></div>
-                                <div class="input-group"><label data-translate-key="ref_physician_name">اسم الطبيب</label><input type="text" id="ref-physician-name"></div>
-                            </div>
-                         </fieldset>
+                     <div id="referral-form-container">
+                         <h3 class="font-bold text-xl text-gray-800 border-b pb-2 mb-4" data-translate-key="ref_form_title">نموذج تقرير الإحالة</h3>
+                         <div id="referral-form" class="space-y-6">
+                             <fieldset class="border p-4 rounded-lg">
+                                 <legend class="px-2 font-bold" data-translate-key="ref_patient_info">بيانات المريض</legend>
+                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                     <div class="input-group"><label data-translate-key="ref_patient_name">اسم المريض الكامل</label><input type="text" id="ref-patient-name"></div>
+                                     <div class="input-group"><label data-translate-key="ref_medical_number">الرقم الطبي</label><input type="text" id="ref-medical-number"></div>
+                                     <div class="input-group"><label data-translate-key="ref_sex">الجنس</label><select id="ref-sex"><option value="male" data-translate-key="sex_male">ذكر</option><option value="female" data-translate-key="sex_female">أنثى</option></select></div>
+                                 </div>
+                             </fieldset>
+                             <fieldset class="border p-4 rounded-lg">
+                                 <legend class="px-2 font-bold" data-translate-key="ref_history_title">التاريخ المرضي</legend>
+                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                     <div class="input-group"><label data-translate-key="ref_medical_history">تاريخ مرضي سابق</label><textarea id="ref-medical-history" rows="2"></textarea></div>
+                                     <div class="input-group"><label data-translate-key="ref_medications">الأدوية الحالية</label><textarea id="ref-medications" rows="2"></textarea></div>
+                                     <div class="input-group"><label data-translate-key="ref_allergy">الحساسية</label><textarea id="ref-allergy" rows="2"></textarea></div>
+                                     <div class="input-group"><label data-translate-key="ref_last_meal">آخر وجبة</label><input type="text" id="ref-last-meal"></div>
+                                 </div>
+                             </fieldset>
+                             <fieldset class="border p-4 rounded-lg">
+                                 <legend class="px-2 font-bold" data-translate-key="ref_burn_event_title">تفاصيل حدث الحرق</legend>
+                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                     <div class="input-group"><label data-translate-key="ref_burn_location">مكان الحرق</label><select id="ref-burn-location"><option value="open" data-translate-key="ref_location_open">مكان مفتوح</option><option value="closed" data-translate-key="ref_location_closed">مكان مغلق</option></select></div>
+                                     <div class="input-group"><label data-translate-key="ref_associated_injuries">إصابات مصاحبة</label><textarea id="ref-associated-injuries" rows="2"></textarea></div>
+                                 </div>
+                             </fieldset>
+                             <fieldset class="border p-4 rounded-lg">
+                                 <legend class="px-2 font-bold" data-translate-key="ref_inhalation_title">علامات الاشتباه في حرق استنشاقي</legend>
+                                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                     <label class="flex items-center"><input type="checkbox" id="ref-facial-burns" class="ml-2 rtl:ml-0 rtl:mr-2 w-4 h-4"><span data-translate-key="ref_facial_burns">حروق بالوجه</span></label>
+                                     <label class="flex items-center"><input type="checkbox" id="ref-singed-hairs" class="ml-2 rtl:ml-0 rtl:mr-2 w-4 h-4"><span data-translate-key="ref_singed_hairs">شعر أنف محروق</span></label>
+                                     <label class="flex items-center"><input type="checkbox" id="ref-soot" class="ml-2 rtl:ml-0 rtl:mr-2 w-4 h-4"><span data-translate-key="ref_soot">سخام في مجرى الهواء</span></label>
+                                     <label class="flex items-center"><input type="checkbox" id="ref-hoarseness" class="ml-2 rtl:ml-0 rtl:mr-2 w-4 h-4"><span data-translate-key="ref_hoarseness">بحة في الصوت</span></label>
+                                 </div>
+                             </fieldset>
+                              <fieldset class="border p-4 rounded-lg">
+                                 <legend class="px-2 font-bold" data-translate-key="ref_management_title">الإجراءات الأولية</legend>
+                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                     <label class="flex items-center"><input type="checkbox" id="ref-iv-line" class="ml-2 rtl:ml-0 rtl:mr-2 w-4 h-4"><span data-translate-key="ref_iv_line">تركيب خط وريدي</span></label>
+                                     <label class="flex items-center"><input type="checkbox" id="ref-catheter" class="ml-2 rtl:ml-0 rtl:mr-2 w-4 h-4"><span data-translate-key="ref_catheter">تركيب قسطرة بولية</span></label>
+                                     <div class="input-group"><label data-translate-key="ref_analgesia">المسكنات المعطاة</label><input type="text" id="ref-analgesia"></div>
+                                     <div class="input-group"><label data-translate-key="ref_escharotomy">موقع بضع الخشارة (Escharotomy)</label><input type="text" id="ref-escharotomy"></div>
+                                 </div>
+                             </fieldset>
+                              <fieldset class="border p-4 rounded-lg">
+                                 <legend class="px-2 font-bold" data-translate-key="ref_provider_info">بيانات جهة التحويل</legend>
+                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                     <div class="input-group"><label data-translate-key="ref_hospital_name">اسم المستشفى</label><input type="text" id="ref-hospital-name"></div>
+                                     <div class="input-group"><label data-translate-key="ref_physician_name">اسم الطبيب</label><input type="text" id="ref-physician-name"></div>
+                                 </div>
+                             </fieldset>
+                         </div>
+                         <div class="mt-8 flex justify-center">
+                            <button id="generateReportPreviewBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg" data-translate-key="generate_preview_btn">حفظ وإنشاء معاينة للتقرير</button>
+                        </div>
+                     </div>
+                     <div id="referral-preview-container" class="hidden">
+                        <!-- Preview will be injected here -->
                      </div>
                 </div>
             </div>
@@ -453,8 +497,8 @@
         initializeBurnCalculator = (lang) => {
             const translations = {
                 ar: {
-                    tab_calculator: "حاسبة الحروق والتوصيات", tab_fluids: "إدارة السوائل", tab_referral: "تقرير الإحالة", export_pdf_btn: "تصدير PDF", reset_btn: "إعادة تعيين الكل",
-                    export_pdf_btn_loading: "جاري تحميل PDF...", export_pdf_btn_error: "PDF غير متاح",
+                    tab_calculator: "حاسبة الحروق والتوصيات", tab_fluids: "إدارة السوائل", tab_referral: "تقرير الإحالة", reset_btn: "إعادة تعيين الكل",
+                    generate_preview_btn: "حفظ وإنشاء معاينة للتقرير", print_report_btn: "طباعة التقرير", edit_data_btn: "تعديل البيانات", report_saved_success: "تم حفظ التقرير بنجاح! معرّف التقرير:",
                     patient_data_title: "1. بيانات المريض وتفاصيل الحرق", age_label: "العمر (سنوات)", weight_label: "الوزن (كجم)", burn_type_label: "نوع الحرق", burn_type_thermal: "حراري (لهب، سائل ساخن)", burn_type_electrical: "كهرباء", burn_type_chemical: "كيميائي", inhalation_injury_label: "اشتباه في حرق استنشاقي",
                     calculation_method_title: "2. طريقة الحساب", rule_of_nines_btn: "Rule of 9s", lund_browder_btn: "Lund-Browder", method_note: "ملاحظة: طريقة Lund-Browder هي الأكثر دقة للأطفال.",
                     degree_title: "3. تحديد درجة الحرق (اختر اللون ثم اضغط على الجسم)", degree_1st: "درجة 1", degree_2nd: "درجة 2", degree_3rd: "درجة 3",
@@ -479,8 +523,8 @@
                     recommendation_none: "لا توجد توصيات خاصة حاليًا بناءً على المدخلات."
                 },
                 en: {
-                    tab_calculator: "Burn Calculator & Recs", tab_fluids: "Fluid Management", tab_referral: "Referral Report", export_pdf_btn: "Export PDF", reset_btn: "Reset All",
-                    export_pdf_btn_loading: "Loading PDF...", export_pdf_btn_error: "PDF Unavailable",
+                    tab_calculator: "Burn Calculator & Recs", tab_fluids: "Fluid Management", tab_referral: "Referral Report", reset_btn: "Reset All",
+                    generate_preview_btn: "Save & Generate Preview", print_report_btn: "Print Report", edit_data_btn: "Edit Data", report_saved_success: "Report saved successfully! Report ID:",
                     patient_data_title: "1. Patient Data & Burn Details", age_label: "Age (years)", weight_label: "Weight (kg)", burn_type_label: "Burn Type", burn_type_thermal: "Thermal (flame, scald)", burn_type_electrical: "Electrical", burn_type_chemical: "Chemical", inhalation_injury_label: "Suspected Inhalation Injury",
                     calculation_method_title: "2. Calculation Method", rule_of_nines_btn: "Rule of 9s", lund_browder_btn: "Lund-Browder", method_note: "Note: Lund-Browder is more accurate for children.",
                     degree_title: "3. Select Burn Degree (Pick color then tap body)", degree_1st: "1st Degree", degree_2nd: "2nd Degree", degree_3rd: "3rd Degree",
@@ -507,56 +551,88 @@
             };
 
             const detailedBodySVG = `
-                <svg viewBox="0 0 320 220" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
-                    <text x="75" y="10" font-size="10" font-weight="bold" text-anchor="middle">Front</text>
-                    <text x="245" y="10" font-size="10" font-weight="bold" text-anchor="middle">Back</text>
-                    
-                    <!-- Front -->
-                    <path data-part="head_front" d="M60,15 h30 a15,15 0 0,1 0,30 h-30 a15,15 0 0,1 0,-30 Z" /> <text x="75" y="33">Head</text>
-                    <path data-part="neck_front" d="M70,45 h10 v5 h-10 Z" />
-                    <path data-part="chest_front" d="M55,50 h40 v30 h-40 Z" /> <text x="75" y="68">Chest</text>
-                    <path data-part="abdomen_front" d="M55,80 h40 v30 h-40 Z" /> <text x="75" y="98">Abdomen</text>
-                    <path data-part="genitalia" d="M72,110 l3,5 l3,-5 Z" />
-                    
-                    <path data-part="right_upper_arm_front" d="M95,52 l15,5 v30 l-15,-5 Z" /> <text x="105" y="72" font-size="7">Upper Arm</text>
-                    <path data-part="right_lower_arm_front" d="M110,87 l10,5 v30 l-10,-5 Z" /> <text x="118" y="107" font-size="7">Lower Arm</text>
-                    <path data-part="right_hand_front" d="M120,122 l5,5 v10 l-5,-5 Z" /> <text x="125" y="132" font-size="7">Hand</text>
-                    
-                    <path data-part="left_upper_arm_front" d="M55,52 l-15,5 v30 l15,-5 Z" /> <text x="45" y="72" font-size="7">Upper Arm</text>
-                    <path data-part="left_lower_arm_front" d="M40,87 l-10,5 v30 l10,-5 Z" /> <text x="32" y="107" font-size="7">Lower Arm</text>
-                    <path data-part="left_hand_front" d="M30,122 l-5,5 v10 l5,-5 Z" /> <text x="25" y="132" font-size="7">Hand</text>
-                    
-                    <path data-part="right_thigh_front" d="M80,112 h15 v50 h-15 Z" /> <text x="87.5" y="142" font-size="7">Thigh</text>
-                    <path data-part="right_lower_leg_front" d="M82,162 h11 v40 h-11 Z" /> <text x="87.5" y="185" font-size="7">Lower Leg</text>
-                    <path data-part="right_foot_front" d="M83,202 h9 v10 h-9 Z" /> <text x="87.5" y="210" font-size="7">Foot</text>
-                    
-                    <path data-part="left_thigh_front" d="M55,112 h15 v50 h-15 Z" /> <text x="62.5" y="142" font-size="7">Thigh</text>
-                    <path data-part="left_lower_leg_front" d="M57,162 h11 v40 h-11 Z" /> <text x="62.5" y="185" font-size="7">Lower Leg</text>
-                    <path data-part="left_foot_front" d="M58,202 h9 v10 h-9 Z" /> <text x="62.5" y="210" font-size="7">Foot</text>
-                    
-                    <!-- Back -->
-                    <path data-part="head_back" d="M230,15 h30 a15,15 0 0,1 0,30 h-30 a15,15 0 0,1 0,-30 Z" /> <text x="245" y="33">Head</text>
-                    <path data-part="neck_back" d="M240,45 h10 v5 h-10 Z" />
-                    <path data-part="upper_back" d="M225,50 h40 v30 h-40 Z" /> <text x="245" y="68">Upper Back</text>
-                    <path data-part="lower_back" d="M225,80 h40 v30 h-40 Z" /> <text x="245" y="98">Lower Back</text>
-                    <path data-part="left_buttock" d="M225,110 h10 v15 h-10 Z" /> <text x="230" y="120" font-size="7">Buttock</text>
-                    <path data-part="right_buttock" d="M255,110 h-10 v15 h10 Z" /> <text x="250" y="120" font-size="7">Buttock</text>
+                <svg viewBox="0 0 320 400" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+                    <g transform="translate(0, 10)">
+                        <text x="75" y="10" font-size="12" font-weight="bold" text-anchor="middle">Front</text>
+                        <path data-part="head_front" d="M50,20 a25,25 0 1,1 50,0 a25,25 0 1,1 -50,0" />
+                        <text x="75" y="48">Head</text>
+                        <path data-part="neck_front" d="M65,70 h20 v10 h-20 Z" />
+                        <path data-part="chest_front" d="M45,80 h60 v40 h-60 Z" />
+                        <text x="75" y="105">Chest</text>
+                        <path data-part="abdomen_front" d="M45,120 h60 v40 h-60 Z" />
+                        <text x="75" y="145">Abdomen</text>
+                        <path data-part="genitalia" d="M70,160 l5,10 l5,-10 Z" />
+                        
+                        <path data-part="right_upper_arm_front" d="M105,85 l20,5 v40 l-20,-5 Z" />
+                        <text x="118" y="110" font-size="8">Upper Arm</text>
+                        <path data-part="right_lower_arm_front" d="M125,130 l15,5 v40 l-15,-5 Z" />
+                        <text x="135" y="155" font-size="8">Lower Arm</text>
+                        <path data-part="right_hand_front" d="M140,175 l10,5 v20 l-10,-5 Z" />
+                        <text x="147" y="190" font-size="8">Hand</text>
+                        
+                        <path data-part="left_upper_arm_front" d="M45,85 l-20,5 v40 l20,-5 Z" />
+                        <text x="32" y="110" font-size="8">Upper Arm</text>
+                        <path data-part="left_lower_arm_front" d="M25,130 l-15,5 v40 l15,-5 Z" />
+                        <text x="15" y="155" font-size="8">Lower Arm</text>
+                        <path data-part="left_hand_front" d="M10,175 l-10,5 v20 l10,-5 Z" />
+                        <text x="3" y="190" font-size="8">Hand</text>
+                        
+                        <path data-part="right_thigh_front" d="M80,170 h20 v70 h-20 Z" />
+                        <text x="90" y="210">Thigh</text>
+                        <path data-part="right_lower_leg_front" d="M82,240 h16 v70 h-16 Z" />
+                        <text x="90" y="280">Lower Leg</text>
+                        <path data-part="right_foot_front" d="M83,310 h14 v20 h-14 Z" />
+                        <text x="90" y="325">Foot</text>
+                        
+                        <path data-part="left_thigh_front" d="M50,170 h20 v70 h-20 Z" />
+                        <text x="60" y="210">Thigh</text>
+                        <path data-part="left_lower_leg_front" d="M52,240 h16 v70 h-16 Z" />
+                        <text x="60" y="280">Lower Leg</text>
+                        <path data-part="left_foot_front" d="M53,310 h14 v20 h-14 Z" />
+                        <text x="60" y="325">Foot</text>
+                    </g>
+                    <g transform="translate(170, 10)">
+                        <text x="75" y="10" font-size="12" font-weight="bold" text-anchor="middle">Back</text>
+                        <path data-part="head_back" d="M50,20 a25,25 0 1,1 50,0 a25,25 0 1,1 -50,0" />
+                        <text x="75" y="48">Head</text>
+                        <path data-part="neck_back" d="M65,70 h20 v10 h-20 Z" />
+                        <path data-part="upper_back" d="M45,80 h60 v40 h-60 Z" />
+                        <text x="75" y="105">Upper Back</text>
+                        <path data-part="lower_back" d="M45,120 h60 v40 h-60 Z" />
+                        <text x="75" y="145">Lower Back</text>
+                        <path data-part="left_buttock" d="M45,160 h25 v20 h-25 Z" />
+                        <text x="57.5" y="175" font-size="8">Buttock</text>
+                        <path data-part="right_buttock" d="M80,160 h25 v20 h-25 Z" />
+                        <text x="92.5" y="175" font-size="8">Buttock</text>
 
-                    <path data-part="right_upper_arm_back" d="M265,52 l15,5 v30 l-15,-5 Z" /> <text x="275" y="72" font-size="7">Upper Arm</text>
-                    <path data-part="right_lower_arm_back" d="M280,87 l10,5 v30 l-10,-5 Z" /> <text x="288" y="107" font-size="7">Lower Arm</text>
-                    <path data-part="right_hand_back" d="M290,122 l5,5 v10 l-5,-5 Z" /> <text x="295" y="132" font-size="7">Hand</text>
-
-                    <path data-part="left_upper_arm_back" d="M225,52 l-15,5 v30 l15,-5 Z" /> <text x="215" y="72" font-size="7">Upper Arm</text>
-                    <path data-part="left_lower_arm_back" d="M210,87 l-10,5 v30 l10,-5 Z" /> <text x="202" y="107" font-size="7">Lower Arm</text>
-                    <path data-part="left_hand_back" d="M200,122 l-5,5 v10 l5,-5 Z" /> <text x="195" y="132" font-size="7">Hand</text>
-
-                    <path data-part="right_thigh_back" d="M250,125 h15 v50 h-15 Z" /> <text x="257.5" y="155" font-size="7">Thigh</text>
-                    <path data-part="right_lower_leg_back" d="M252,175 h11 v40 h-11 Z" /> <text x="257.5" y="198" font-size="7">Lower Leg</text>
-                    <path data-part="right_foot_back" d="M253,215 h9 v10 h-9 Z" /> <text x="257.5" y="223" font-size="7">Foot</text>
-
-                    <path data-part="left_thigh_back" d="M225,125 h15 v50 h-15 Z" /> <text x="232.5" y="155" font-size="7">Thigh</text>
-                    <path data-part="left_lower_leg_back" d="M227,175 h11 v40 h-11 Z" /> <text x="232.5" y="198" font-size="7">Lower Leg</text>
-                    <path data-part="left_foot_back" d="M228,215 h9 v10 h-9 Z" /> <text x="232.5" y="223" font-size="7">Foot</text>
+                        <path data-part="right_upper_arm_back" d="M105,85 l20,5 v40 l-20,-5 Z" />
+                        <text x="118" y="110" font-size="8">Upper Arm</text>
+                        <path data-part="right_lower_arm_back" d="M125,130 l15,5 v40 l-15,-5 Z" />
+                        <text x="135" y="155" font-size="8">Lower Arm</text>
+                        <path data-part="right_hand_back" d="M140,175 l10,5 v20 l-10,-5 Z" />
+                        <text x="147" y="190" font-size="8">Hand</text>
+                        
+                        <path data-part="left_upper_arm_back" d="M45,85 l-20,5 v40 l20,-5 Z" />
+                        <text x="32" y="110" font-size="8">Upper Arm</text>
+                        <path data-part="left_lower_arm_back" d="M25,130 l-15,5 v40 l15,-5 Z" />
+                        <text x="15" y="155" font-size="8">Lower Arm</text>
+                        <path data-part="left_hand_back" d="M10,175 l-10,5 v20 l10,-5 Z" />
+                        <text x="3" y="190" font-size="8">Hand</text>
+                        
+                        <path data-part="right_thigh_back" d="M80,180 h20 v70 h-20 Z" />
+                        <text x="90" y="220">Thigh</text>
+                        <path data-part="right_lower_leg_back" d="M82,250 h16 v70 h-16 Z" />
+                        <text x="90" y="290">Lower Leg</text>
+                        <path data-part="right_foot_back" d="M83,320 h14 v20 h-14 Z" />
+                        <text x="90" y="335">Foot</text>
+                        
+                        <path data-part="left_thigh_back" d="M50,180 h20 v70 h-20 Z" />
+                        <text x="60" y="220">Thigh</text>
+                        <path data-part="left_lower_leg_back" d="M52,250 h16 v70 h-16 Z" />
+                        <text x="60" y="290">Lower Leg</text>
+                        <path data-part="left_foot_back" d="M53,320 h14 v20 h-14 Z" />
+                        <text x="60" y="335">Foot</text>
+                    </g>
                 </svg>
             `;
             
@@ -668,7 +744,7 @@
                     firstPhaseContainer.classList.add('hidden');
                     const totalFluidRemaining = totalFluid - preHospitalFluids;
                     const totalHoursRemaining = 24 - hoursSinceBurn;
-                    const continuousRate = totalHoursRemaining > 0 ? totalFluidRemaining / totalHoursRemaining : totalFluidRemaining;
+                    const continuousRate = totalHoursRemaining > 0 ? totalFluidRemaining / totalHoursRemaining : 0;
 
                     getEl('next-16h-fluid').textContent = `${Math.round(totalFluidRemaining)} ml`;
                     getEl('next-16h-rate').textContent = `${Math.round(continuousRate)} ml/hr`;
@@ -720,8 +796,8 @@
                     admissionEl.textContent = translations[lang].admission_needed;
                     admissionEl.className = 'text-center font-semibold mb-4 p-2 rounded-md bg-red-100 text-red-800';
                 } else {
-                     admissionEl.textContent = translations[lang].no_admission_needed;
-                     admissionEl.className = 'text-center font-semibold mb-4 p-2 rounded-md bg-green-100 text-green-800';
+                        admissionEl.textContent = translations[lang].no_admission_needed;
+                        admissionEl.className = 'text-center font-semibold mb-4 p-2 rounded-md bg-green-100 text-green-800';
                 }
 
                 if (inhalation) recommendations.push(translations[lang].recommendation_airway);
@@ -737,37 +813,64 @@
                 if (!part) return;
                 if (selectedDegree === 'clear' || (burnData[part] && burnData[part].degree === selectedDegree)) {
                     delete burnData[part];
-                    e.target.style.fill = '#E5E7EB';
+                    e.target.style.fill = '#f3f4f6';
                 } else {
                     burnData[part] = { degree: selectedDegree };
                     e.target.style.fill = getComputedStyle(document.documentElement).getPropertyValue(`--degree-${selectedDegree}-color`);
                 }
                 updateCalculations();
             };
+            
+            const referralFormContainer = getEl('referral-form-container');
+            const previewContainer = getEl('referral-preview-container');
 
             const handleReset = () => {
                 burnData = {};
                 ageInput.value = ''; weightInput.value = '';
                 getEl('inhalation-injury').checked = false;
                 getEl('burnType').value = 'thermal';
-                getEl('preHospitalFluids').value = ''; getEl('burnTime').value = '';
-                document.querySelectorAll('.body-diagram path').forEach(p => p.style.fill = '#E5E7EB');
+                getEl('preHospitalFluids').value = ''; 
+                
+                const burnTimeInput = getEl('burnTime');
+                const now = new Date();
+                now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+                burnTimeInput.value = now.toISOString().slice(0, 16);
+
+                document.querySelectorAll('.body-diagram path').forEach(p => p.style.fill = '#f3f4f6');
+                const referralForm = getEl('referral-form');
+                referralForm.querySelectorAll('input[type="text"], input[type="number"], textarea').forEach(input => input.value = '');
+                referralForm.querySelectorAll('input[type="checkbox"]').forEach(checkbox => checkbox.checked = false);
+                referralForm.querySelectorAll('select').forEach(select => select.selectedIndex = 0);
+                
+                previewContainer.classList.add('hidden');
+                referralFormContainer.classList.remove('hidden');
                 updateCalculations();
             };
             
             const populateReferralForm = () => {
-                getEl('ref-patient-name').value = getEl('ref-patient-name').value || '';
-                // You can add more auto-population here if needed
-                getEl('ref-facial-burns').checked = getEl('inhalation-injury').checked;
+                 getEl('ref-facial-burns').checked = getEl('inhalation-injury').checked || Object.keys(burnData).some(p => p.includes('head'));
             };
             
-            const generatePrintableReport = async () => {
+            const createReportRow = (label, value, unit = '') => {
+                if (value === null || value === undefined || value === '' || value === false) return '';
+                const displayValue = value === true ? 'Yes' : `${value} ${unit}`.trim();
+                return `<p class="py-1"><strong>${label}:</strong> ${displayValue}</p>`;
+            };
+            
+            const generateReportPreview = async () => {
+                const btn = getEl('generateReportPreviewBtn');
+                btn.disabled = true;
+                btn.textContent = 'Saving...';
+
                 try {
-                    if (typeof window.canvg === 'undefined') {
-                        throw new Error('Canvg library not loaded');
+                    if (typeof window.canvg === 'undefined' || typeof window.canvg.Canvg === 'undefined') {
+                        throw new Error('Canvg library not loaded correctly.');
                     }
+                    
                     const diagramContainer = getEl('diagram-container');
                     const svgElement = diagramContainer.querySelector('svg');
+                    if (!svgElement) throw new Error('SVG diagram not found');
+
                     const canvas = document.createElement('canvas');
                     canvas.width = svgElement.viewBox.baseVal.width;
                     canvas.height = svgElement.viewBox.baseVal.height;
@@ -776,83 +879,164 @@
                     await v.render();
                     const diagramDataUrl = canvas.toDataURL('image/png');
 
-                    const reportWindow = window.open('', '_blank');
-                    reportWindow.document.write(`
-                        <html>
-                            <head>
-                                <title>Burn Report</title>
-                                <script src="https://cdn.tailwindcss.com"><\/script>
-                                <style>
-                                    body { font-family: 'Cairo', sans-serif; position: relative; }
-                                    .watermark {
-                                        position: fixed;
-                                        top: 50%;
-                                        left: 50%;
-                                        transform: translate(-50%, -50%) rotate(-45deg);
-                                        opacity: 0.1;
-                                        pointer-events: none;
-                                        z-index: -1;
-                                        width: 80%;
-                                        max-width: 500px;
-                                    }
-                                    @media print {
-                                        body { -webkit-print-color-adjust: exact; }
-                                        .no-print { display: none; }
-                                    }
-                                </style>
-                            </head>
-                            <body class="p-8">
-                                <img src="https://raw.githubusercontent.com/doctorbishoy/Plasticology/928a39dfd5da55d3c4f20189d8604be717d7bd40/Plasticology%202025%20Logo%20white%20outline.png" class="watermark" />
-                                <h1 class="text-2xl font-bold text-center mb-6">Burn Assessment & Referral Report</h1>
-                                
-                                <div class="grid grid-cols-2 gap-6">
-                                    <div>
-                                        <h2 class="text-lg font-bold border-b mb-2">Patient Details</h2>
-                                        <p><strong>Name:</strong> ${getEl('ref-patient-name').value || 'N/A'}</p>
-                                        <p><strong>MRN:</strong> ${getEl('ref-medical-number').value || 'N/A'}</p>
-                                        <p><strong>Age:</strong> ${getEl('age').value || 'N/A'}</p>
-                                        <p><strong>Weight:</strong> ${getEl('weight').value || 'N/A'} kg</p>
-                                    </div>
-                                    <div>
-                                        <h2 class="text-lg font-bold border-b mb-2">Burn Details</h2>
-                                        <p><strong>Burn Time:</strong> ${getEl('burnTime').value.replace('T', ' ') || 'N/A'}</p>
-                                        <p><strong>Burn Type:</strong> ${getEl('burnType').value}</p>
-                                        <p><strong>Inhalation Injury:</strong> ${getEl('inhalation-injury').checked ? 'Yes' : 'No'}</p>
-                                    </div>
-                                </div>
+                    const getSelectText = (elId) => { const el = getEl(elId); return el.options[el.selectedIndex].text; };
+                    
+                    const reportData = {
+                        patientName: getEl('ref-patient-name').value,
+                        medicalNumber: getEl('ref-medical-number').value,
+                        sex: getSelectText('ref-sex'),
+                        age: getEl('age').value,
+                        weight: getEl('weight').value,
+                        burnTime: getEl('burnTime').value.replace('T', ' '),
+                        burnType: getSelectText('burnType'),
+                        burnLocation: getSelectText('ref-burn-location'),
+                        associatedInjuries: getEl('ref-associated-injuries').value,
+                        result1st: getEl('result-1st').textContent,
+                        result2nd: getEl('result-2nd').textContent,
+                        result3rd: getEl('result-3rd').textContent,
+                        totalTbsa: getEl('total-tbsa').textContent,
+                        bauxScore: getEl('baux-score').textContent,
+                        totalFluid: getEl('total-fluid').textContent,
+                        first8hRate: getEl('first-8h-rate').textContent,
+                        next16hRate: getEl('next-16h-rate').textContent,
+                        preHospitalFluids: getEl('preHospitalFluids').value,
+                        medicalHistory: getEl('ref-medical-history').value,
+                        medications: getEl('ref-medications').value,
+                        allergy: getEl('ref-allergy').value,
+                        lastMeal: getEl('ref-last-meal').value,
+                        inhalationSuspected: getEl('inhalation-injury').checked,
+                        facialBurns: getEl('ref-facial-burns').checked,
+                        singedHairs: getEl('ref-singed-hairs').checked,
+                        sootInAirway: getEl('ref-soot').checked,
+                        hoarseness: getEl('ref-hoarseness').checked,
+                        ivLine: getEl('ref-iv-line').checked,
+                        catheter: getEl('ref-catheter').checked,
+                        analgesia: getEl('ref-analgesia').value,
+                        escharotomy: getEl('ref-escharotomy').value,
+                        hospitalName: getEl('ref-hospital-name').value,
+                        physicianName: getEl('ref-physician-name').value,
+                        createdAt: new Date().toISOString()
+                    };
 
-                                <div class="grid grid-cols-2 gap-6 mt-6">
-                                    <div>
-                                        <h2 class="text-lg font-bold border-b mb-2">TBSA Calculation</h2>
-                                        <p><strong>1st Degree:</strong> ${getEl('result-1st').textContent}</p>
-                                        <p><strong>2nd Degree:</strong> ${getEl('result-2nd').textContent}</p>
-                                        <p><strong>3rd Degree:</strong> ${getEl('result-3rd').textContent}</p>
-                                        <p><strong>Total TBSA (2nd+3rd):</strong> ${getEl('total-tbsa').textContent}</p>
-                                        <p><strong>Baux Score:</strong> ${getEl('baux-score').textContent}</p>
+                    // Save to Firebase
+                    const docRef = await window.firebaseAddDoc(window.firebaseCollection(window.firebaseDB, "burn_reports"), reportData);
+                    console.log("Document written with ID: ", docRef.id);
+
+                    let inhalationSignsHtml = [
+                        reportData.inhalationSuspected ? '<li>Suspected based on initial form</li>' : '',
+                        reportData.facialBurns ? '<li>Facial Burns noted</li>' : '',
+                        reportData.singedHairs ? '<li>Singed Nasal Hairs noted</li>' : '',
+                        reportData.sootInAirway ? '<li>Soot in Airway noted</li>' : '',
+                        reportData.hoarseness ? '<li>Hoarseness of Voice noted</li>' : ''
+                    ].filter(Boolean).join('');
+                    if (!inhalationSignsHtml) {
+                        inhalationSignsHtml = '<li>No signs of inhalation injury noted.</li>';
+                    }
+
+                    const reportContentHtml = `
+                        <div class="printable-area bg-white text-gray-800 p-6" dir="${lang === 'ar' ? 'rtl' : 'ltr'}">
+                             <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4" role="alert">
+                                <p class="font-bold">${translations[lang].report_saved_success}</p>
+                                <p>${docRef.id}</p>
+                            </div>
+                            <img src="https://raw.githubusercontent.com/doctorbishoy/Plasticology/928a39dfd5da55d3c4f20189d8604be717d7bd40/Plasticology%202025%20Logo%20white%20outline.png" class="watermark" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); opacity: 0.08; pointer-events: none; z-index: 0; width: 80%; max-width: 500px;" />
+                            <div style="position: relative; z-index: 1;">
+                                <header class="flex justify-between items-start mb-6 border-b pb-4">
+                                    <div class="flex items-center space-x-3 rtl:space-x-reverse">
+                                       <img src="https://raw.githubusercontent.com/doctorbishoy/Plasticology/928a39dfd5da55d3c4f20189d8604be717d7bd40/Plasticology%202025%20Logo%20white%20outline.png" class="h-16 w-16">
+                                       <div>
+                                           <h1 class="text-xl font-bold">Plasticology Online Companion</h1>
+                                           <p class="text-md font-bold text-teal-700">Burn Assessment & Referral Report</p>
+                                       </div>
                                     </div>
-                                    <div>
-                                         <h2 class="text-lg font-bold border-b mb-2">Burn Diagram</h2>
-                                         <img src="${diagramDataUrl}" class="w-full border" />
+                                    <div class="text-sm text-right rtl:text-left">
+                                       <p><strong>Report Date:</strong> ${new Date().toLocaleString()}</p>
                                     </div>
-                                </div>
-                                 <div class="mt-6">
-                                    <h2 class="text-lg font-bold border-b mb-2">Fluid Management</h2>
-                                    <p><strong>Total Fluid in 24h:</strong> ${getEl('total-fluid').textContent}</p>
-                                    <p><strong>First 8h Rate:</strong> ${getEl('first-8h-rate').textContent}</p>
-                                    <p><strong>Next 16h Rate:</strong> ${getEl('next-16h-rate').textContent}</p>
-                                </div>
-                                
-                                <button onclick="window.print()" class="no-print fixed bottom-4 right-4 bg-blue-600 text-white py-2 px-4 rounded-lg shadow-lg">Print / Save as PDF</button>
-                            </body>
-                        </html>
-                    `);
-                    reportWindow.document.close();
-                    setTimeout(() => {
-                        reportWindow.print();
-                    }, 500);
+                                </header>
+                                <main class="space-y-6">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div class="border rounded-lg p-4 space-y-1">
+                                            <h2 class="text-lg font-bold border-b mb-3 pb-2 text-teal-600">Patient & Burn Summary</h2>
+                                            ${createReportRow('Patient Name', reportData.patientName)}
+                                            ${createReportRow('Medical Number', reportData.medicalNumber)}
+                                            ${createReportRow('Age', reportData.age, 'years')}
+                                            ${createReportRow('Weight', reportData.weight, 'kg')}
+                                            ${createReportRow('Sex', reportData.sex)}
+                                            ${createReportRow('Time of Burn', reportData.burnTime)}
+                                            ${createReportRow('Burn Type', reportData.burnType)}
+                                        </div>
+                                        <div class="border rounded-lg p-4 space-y-1">
+                                           <h2 class="text-lg font-bold border-b mb-3 pb-2 text-teal-600">Burn Assessment</h2>
+                                           ${createReportRow('1st Degree TBSA', reportData.result1st)}
+                                           ${createReportRow('2nd Degree TBSA', reportData.result2nd)}
+                                           ${createReportRow('3rd Degree TBSA', reportData.result3rd)}
+                                           <p class="mt-2 pt-2 border-t"><strong>Total TBSA (2nd+3rd): ${reportData.totalTbsa}</strong></p>
+                                           <p><strong>Baux Score: ${reportData.bauxScore}</strong></p>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                       <div class="border rounded-lg p-4 flex flex-col items-center">
+                                            <h2 class="text-lg font-bold border-b mb-3 pb-2 w-full text-center text-teal-600">Burn Diagram</h2>
+                                            <img src="${diagramDataUrl}" class="w-full max-w-xs border" />
+                                       </div>
+                                       <div class="border rounded-lg p-4">
+                                           <h2 class="text-lg font-bold border-b mb-3 pb-2 text-teal-600">Fluid Management Plan</h2>
+                                           ${createReportRow('Pre-Hospital Fluids', reportData.preHospitalFluids, 'mL')}
+                                           <p class="mt-2 pt-2 border-t"><strong>Total Resuscitation Fluid (24h):</strong> ${reportData.totalFluid}</p>
+                                           <p><strong>First Phase (8h) Rate:</strong> ${reportData.first8hRate}</p>
+                                           <p><strong>Second Phase (16h) Rate:</strong> ${reportData.next16hRate}</p>
+                                           <h2 class="text-lg font-bold border-b mt-4 mb-2 pb-2 text-teal-600">Recommendations</h2>
+                                           <div class="text-sm space-y-2">${getEl('recommendations-output').innerHTML}</div>
+                                       </div>
+                                    </div>
+                                    <div class="space-y-6">
+                                       <div class="border rounded-lg p-4"><h2 class="text-lg font-bold border-b mb-3 pb-2 text-teal-600">Patient History (AMPL)</h2>
+                                          ${createReportRow('Allergies', reportData.allergy)} ${createReportRow('Medications', reportData.medications)} ${createReportRow('Past Medical History', reportData.medicalHistory)} ${createReportRow('Last Meal', reportData.lastMeal)}
+                                       </div>
+                                       <div class="border rounded-lg p-4"><h2 class="text-lg font-bold border-b mb-3 pb-2 text-teal-600">Event & Inhalation Details</h2>
+                                          ${createReportRow('Location of Burn Event', reportData.burnLocation)} ${createReportRow('Associated Injuries', reportData.associatedInjuries)}
+                                          <div class="mt-2 pt-2 border-t"><p class="font-semibold">Inhalation Injury Assessment:</p><ul class="list-disc list-inside ml-4 rtl:ml-0 rtl:mr-4">${inhalationSignsHtml}</ul></div>
+                                       </div>
+                                       <div class="border rounded-lg p-4"><h2 class="text-lg font-bold border-b mb-3 pb-2 text-teal-600">Initial Management Provided</h2>
+                                           ${createReportRow('IV Line Inserted', reportData.ivLine)} ${createReportRow('Urinary Catheter Inserted', reportData.catheter)} ${createReportRow('Analgesia Given', reportData.analgesia)} ${createReportRow('Escharotomy Performed', reportData.escharotomy)}
+                                       </div>
+                                    </div>
+                                    <div class="border rounded-lg p-4 mt-6"><h2 class="text-lg font-bold border-b mb-3 pb-2 text-teal-600">Referring Provider Information</h2>
+                                       ${createReportRow('Referring Hospital', reportData.hospitalName)} ${createReportRow('Referring Physician', reportData.physicianName)}
+                                    </div>
+                                </main>
+                                <footer class="text-center mt-8 pt-4 border-t text-xs text-gray-500">
+                                   <p>Report generated by Plasticology Online Companion © Dr Bishoy - Surgery Masters Academy</p>
+                                </footer>
+                            </div>
+                        </div>
+                    `;
+                    
+                    const previewHtml = `
+                        ${reportContentHtml}
+                        <div class="no-print mt-8 flex justify-center space-x-4 rtl:space-x-reverse">
+                            <button id="printReportBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg" data-translate-key="print_report_btn">طباعة التقرير</button>
+                            <button id="editReportBtn" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded-lg" data-translate-key="edit_data_btn">تعديل البيانات</button>
+                        </div>
+                    `;
+
+                    previewContainer.innerHTML = previewHtml;
+                    referralFormContainer.classList.add('hidden');
+                    previewContainer.classList.remove('hidden');
+                    setLanguage(lang, translations); 
+
+                    getEl('printReportBtn').addEventListener('click', () => window.print());
+                    getEl('editReportBtn').addEventListener('click', () => {
+                        previewContainer.classList.add('hidden');
+                        referralFormContainer.classList.remove('hidden');
+                    });
+
                 } catch (error) {
-                     console.error("Error generating printable report:", error);
-                     showErrorModal('Could not generate the report image. Please try again.');
+                    console.error("Error generating report preview:", error);
+                    showErrorModal(error.message || 'Could not generate the report preview.');
+                } finally {
+                    btn.disabled = false;
+                    btn.innerHTML = translations[lang].generate_preview_btn;
                 }
             };
             
@@ -895,8 +1079,14 @@
                 el.addEventListener('input', updateCalculations);
             });
             getEl('resetBtn').addEventListener('click', handleReset);
-            getEl('generatePdfBtn').addEventListener('click', generatePrintableReport);
+            getEl('generateReportPreviewBtn').addEventListener('click', generateReportPreview);
             
+            // Set default date and time
+            const burnTimeInput = getEl('burnTime');
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset()); // Adjust for local timezone
+            burnTimeInput.value = now.toISOString().slice(0, 16);
+
             getEl('ruleOfNinesBtn').classList.add('active');
             getEl('color-palette').querySelector('[data-degree="2nd"]').classList.add('selected');
             updateCalculations();
