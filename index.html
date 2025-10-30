@@ -764,7 +764,7 @@
                 if (type === 'electrical') recommendations.push(translations[lang].recommendation_electrical);
                 if (type === 'chemical') recommendations.push(translations[lang].recommendation_chemical);
 
-                outputEl.innerHTML = recommendations.length ? recommendations.map(rec => `<div class="flex items-start"><svg class="w-5 h-5 text-blue-600 mr-2 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><span>${rec}</span></div>`).join('') : `<p>${translations[lang].recommendation_none}</p>`;
+                outputEl.innerHTML = recommendations.length ? recommendations.map(rec => `<div class="flex items-start"><svg class="w-5 h-5 text-blue-600 mr-2 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><span>${rec}</span></div>`).join('') : `<p>${translations[lang].recommendation_none}</p>`;
             };
 
             const handleBodyPartClick = (e) => {
@@ -816,15 +816,11 @@
                 return `<p class="py-1"><strong>${label}:</strong> ${displayValue}</p>`;
             };
             
-            // ===================================================================
-            // THIS IS THE MODIFIED FUNCTION
-            // ===================================================================
             const generateReportPreview = async () => {
                 const btn = getEl('generateReportPreviewBtn');
                 btn.disabled = true;
                 btn.textContent = 'Saving...';
-
-                // --- Gathers all the data from your form ---
+                
                 const getSelectText = (elId) => { const el = getEl(elId); return el.options[el.selectedIndex].text; };
                 const reportData = {
                     patientName: getEl('ref-patient-name').value,
@@ -863,8 +859,7 @@
                 };
 
                 try {
-                    // --- This is the new part that sends data to your Worker ---
-                    const WORKER_URL = 'https://burn-report-api.drbishoy.workers.dev/'; // Your URL is here!
+                    const WORKER_URL = 'https://burn-report-api.drbishoy.workers.dev/';
                     const response = await fetch(WORKER_URL, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -880,8 +875,7 @@
                         throw new Error(result.error || 'An unknown error occurred while saving.');
                     }
                     
-                    const reportId = result.id; // The new Report ID from our database!
-                    // --- End of the new part ---
+                    const reportId = result.id;
 
                     if (typeof window.canvg === 'undefined' || typeof window.canvg.Canvg === 'undefined') {
                         throw new Error('Canvg library not loaded correctly.');
@@ -900,12 +894,13 @@
                     const diagramDataUrl = canvas.toDataURL('image/png');
 
                     let inhalationSignsHtml = [
-                        reportData.inhalationSuspected ? `<li>${translations[lang].ref_inhalation_title} (Suspected)</li>` : '',
+                        reportData.inhalationSuspected ? `<li>Suspected (from initial assessment)</li>` : '',
                         reportData.facialBurns ? `<li>${translations[lang].ref_facial_burns}</li>` : '',
                         reportData.singedHairs ? `<li>${translations[lang].ref_singed_hairs}</li>` : '',
                         reportData.sootInAirway ? `<li>${translations[lang].ref_soot}</li>` : '',
                         reportData.hoarseness ? `<li>${translations[lang].ref_hoarseness}</li>` : ''
                     ].filter(Boolean).join('');
+
                     if (!inhalationSignsHtml) {
                         inhalationSignsHtml = '<li>No signs of inhalation injury noted.</li>';
                     }
@@ -1058,10 +1053,9 @@
             getEl('resetBtn').addEventListener('click', handleReset);
             getEl('generateReportPreviewBtn').addEventListener('click', generateReportPreview);
             
-            // Set default date and time
             const burnTimeInput = getEl('burnTime');
             const now = new Date();
-            now.setMinutes(now.getMinutes() - now.getTimezoneOffset()); // Adjust for local timezone
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
             burnTimeInput.value = now.toISOString().slice(0, 16);
 
             getEl('ruleOfNinesBtn').classList.add('active');
