@@ -103,11 +103,9 @@
             </div>
         </header>
 
-        <!-- Dashboard View -->
         <div id="dashboard-view" class="app-view active">
             <h2 class="text-3xl font-bold text-center text-gray-800 mb-8" data-translate-key="dashboard_title">Select a Tool</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
-                <!-- Burn Calculator Card -->
                 <div id="open-burn-calculator" class="tool-card from-red-50 to-orange-100 text-red-800 p-6 rounded-2xl shadow-lg cursor-pointer flex flex-col items-center justify-center">
                     <div class="p-4 bg-white/50 rounded-full mb-4">
                         <svg class="w-16 h-16 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -118,7 +116,6 @@
                     <h3 class="text-xl font-bold text-center" data-translate-key="burn_tool_title">Burn Calculator</h3>
                     <p class="text-red-700 mt-2 text-center" data-translate-key="burn_tool_desc">Calculate TBSA, fluids, Baux Score, with ATLS recommendations.</p>
                 </div>
-                <!-- BMI Calculator Card -->
                 <div id="open-bmi-calculator" class="tool-card from-blue-50 to-indigo-100 text-blue-800 p-6 rounded-2xl shadow-lg cursor-pointer text-center flex flex-col items-center justify-center">
                     <div class="p-4 bg-white/50 rounded-full mb-4">
                         <svg class="w-16 h-16 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
@@ -126,7 +123,6 @@
                     <h3 class="text-xl font-bold text-center" data-translate-key="bmi_tool_title">BMI Calculator</h3>
                     <p class="text-blue-700 mt-2 text-center" data-translate-key="bmi_tool_desc">Calculate BMI, ideal weight, and required weight change.</p>
                 </div>
-                <!-- Local Anesthesia Calculator Card -->
                 <div id="open-anesthesia-calculator" class="tool-card from-green-50 to-emerald-100 text-green-800 p-6 rounded-2xl shadow-lg cursor-pointer text-center flex flex-col items-center justify-center">
                     <div class="p-4 bg-white/50 rounded-full mb-4">
                         <svg class="w-16 h-16 text-green-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M20.71 5.63l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-3.12 3.12-1.93-1.91-1.41 1.41 1.42 1.42L3 16.25V21h4.75l8.92-8.92 1.42 1.42 1.41-1.41-1.92-1.92 3.12-3.12c.4-.4.4-1.03.01-1.42zM6.92 19L5 17.08l8.06-8.06 1.92 1.92L6.92 19z" /></svg>
@@ -134,8 +130,7 @@
                     <h3 class="text-xl font-bold text-center" data-translate-key="anesthesia_tool_title">Local Anesthesia Calculator</h3>
                     <p class="text-green-700 mt-2 text-center" data-translate-key="anesthesia_tool_desc">Calculate max safe dose in mL based on weight and anesthetic type.</p>
                 </div>
-                 <!-- GCS Calculator Card -->
-                <div id="open-gcs-calculator" class="tool-card from-yellow-50 to-amber-100 text-yellow-800 p-6 rounded-2xl shadow-lg cursor-pointer text-center flex flex-col items-center justify-center">
+                 <div id="open-gcs-calculator" class="tool-card from-yellow-50 to-amber-100 text-yellow-800 p-6 rounded-2xl shadow-lg cursor-pointer text-center flex flex-col items-center justify-center">
                     <div class="p-4 bg-white/50 rounded-full mb-4">
                         <svg class="w-16 h-16 text-yellow-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
@@ -144,7 +139,6 @@
                     <h3 class="text-xl font-bold text-center" data-translate-key="gcs_tool_title">GCS Calculator</h3>
                     <p class="text-yellow-700 mt-2 text-center" data-translate-key="gcs_tool_desc">Calculate Glasgow Coma Scale and classify injury severity.</p>
                 </div>
-                <!-- Plasticology Radio Card -->
                 <div id="open-radio" class="tool-card from-slate-50 to-gray-100 text-slate-800 p-6 rounded-2xl shadow-lg cursor-pointer text-center flex flex-col items-center justify-center">
                      <div class="p-4 bg-white/50 rounded-full mb-4">
                         <svg class="w-16 h-16 text-slate-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -154,7 +148,6 @@
                     <h3 class="text-xl font-bold text-center" data-translate-key="radio_tool_title">Plasticology Radio</h3>
                     <p class="text-slate-700 mt-2 text-center" data-translate-key="radio_tool_desc">Stay tuned for our new audio experience.</p>
                 </div>
-                <!-- Plasticology Course Card -->
                 <div id="open-plasticology-course" class="tool-card from-purple-50 to-violet-100 text-purple-800 p-6 rounded-2xl shadow-lg cursor-pointer text-center flex flex-col items-center justify-center">
                      <div class="p-4 bg-white/50 rounded-full mb-4">
                         <img src="https://pub-fb0d46cb77cb4e22b5863540fe118da4.r2.dev/Plasticology%202025%20Logo%20white%20outline.png" alt="Plasticology Course" class="w-16 h-16">
@@ -165,16 +158,12 @@
             </div>
         </div>
 
-        <!-- Burn Calculator View -->
         <div id="burn-calculator-view" class="app-view"></div>
 
-        <!-- BMI Calculator View -->
         <div id="bmi-calculator-view" class="app-view"></div>
 
-        <!-- Local Anesthesia Calculator View -->
         <div id="anesthesia-calculator-view" class="app-view"></div>
         
-        <!-- GCS Calculator View -->
         <div id="gcs-calculator-view" class="app-view"></div>
         
         <footer class="text-center mt-8 text-sm text-gray-500">
@@ -183,7 +172,6 @@
 
     </div>
     
-    <!-- Modal Structure -->
     <div id="error-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white p-8 rounded-lg shadow-xl max-w-sm w-full text-center">
             <h3 class="text-2xl font-bold text-red-600 mb-4" data-translate-key="modal_error_title">خطأ</h3>
@@ -192,34 +180,6 @@
         </div>
     </div>
     
-    <!-- Firebase SDKs -->
-    <script type="module">
-        // Import the functions you need from the SDKs you need
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
-        
-        // Your web app's Firebase configuration
-        // IMPORTANT: Replace with your actual Firebase config
-        const firebaseConfig = {
-          apiKey: "YOUR_API_KEY",
-          authDomain: "YOUR_AUTH_DOMAIN",
-          projectId: "YOUR_PROJECT_ID",
-          storageBucket: "YOUR_STORAGE_BUCKET",
-          messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-          appId: "YOUR_APP_ID"
-        };
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        
-        // Make db accessible globally for other scripts
-        window.firebaseDB = db;
-        window.firebaseCollection = collection;
-        window.firebaseAddDoc = addDoc;
-
-    </script>
-
     <script>
     // Main app logic encapsulated
     (() => {
@@ -488,8 +448,7 @@
                         </div>
                      </div>
                      <div id="referral-preview-container" class="hidden">
-                        <!-- Preview will be injected here -->
-                     </div>
+                        </div>
                 </div>
             </div>
         `;
@@ -498,7 +457,7 @@
             const translations = {
                 ar: {
                     tab_calculator: "حاسبة الحروق والتوصيات", tab_fluids: "إدارة السوائل", tab_referral: "تقرير الإحالة", reset_btn: "إعادة تعيين الكل",
-                    generate_preview_btn: "حفظ وإنشاء معاينة للتقرير", print_report_btn: "طباعة التقرير", edit_data_btn: "تعديل البيانات", report_saved_success: "تم حفظ التقرير بنجاح! معرّف التقرير:",
+                    generate_preview_btn: "حفظ وإنشاء معاينة للتقرير", print_report_btn: "طباعة التقرير", edit_data_btn: "تعديل البيانات", report_saved_success: "تم حفظ التقرير بنجاح!",
                     patient_data_title: "1. بيانات المريض وتفاصيل الحرق", age_label: "العمر (سنوات)", weight_label: "الوزن (كجم)", burn_type_label: "نوع الحرق", burn_type_thermal: "حراري (لهب، سائل ساخن)", burn_type_electrical: "كهرباء", burn_type_chemical: "كيميائي", inhalation_injury_label: "اشتباه في حرق استنشاقي",
                     calculation_method_title: "2. طريقة الحساب", rule_of_nines_btn: "Rule of 9s", lund_browder_btn: "Lund-Browder", method_note: "ملاحظة: طريقة Lund-Browder هي الأكثر دقة للأطفال.",
                     degree_title: "3. تحديد درجة الحرق (اختر اللون ثم اضغط على الجسم)", degree_1st: "درجة 1", degree_2nd: "درجة 2", degree_3rd: "درجة 3",
@@ -524,7 +483,7 @@
                 },
                 en: {
                     tab_calculator: "Burn Calculator & Recs", tab_fluids: "Fluid Management", tab_referral: "Referral Report", reset_btn: "Reset All",
-                    generate_preview_btn: "Save & Generate Preview", print_report_btn: "Print Report", edit_data_btn: "Edit Data", report_saved_success: "Report saved successfully! Report ID:",
+                    generate_preview_btn: "Save & Generate Preview", print_report_btn: "Print Report", edit_data_btn: "Edit Data", report_saved_success: "Report saved successfully!",
                     patient_data_title: "1. Patient Data & Burn Details", age_label: "Age (years)", weight_label: "Weight (kg)", burn_type_label: "Burn Type", burn_type_thermal: "Thermal (flame, scald)", burn_type_electrical: "Electrical", burn_type_chemical: "Chemical", inhalation_injury_label: "Suspected Inhalation Injury",
                     calculation_method_title: "2. Calculation Method", rule_of_nines_btn: "Rule of 9s", lund_browder_btn: "Lund-Browder", method_note: "Note: Lund-Browder is more accurate for children.",
                     degree_title: "3. Select Burn Degree (Pick color then tap body)", degree_1st: "1st Degree", degree_2nd: "2nd Degree", degree_3rd: "3rd Degree",
@@ -857,12 +816,73 @@
                 return `<p class="py-1"><strong>${label}:</strong> ${displayValue}</p>`;
             };
             
+            // ===================================================================
+            // THIS IS THE MODIFIED FUNCTION
+            // ===================================================================
             const generateReportPreview = async () => {
                 const btn = getEl('generateReportPreviewBtn');
                 btn.disabled = true;
                 btn.textContent = 'Saving...';
 
+                // --- Gathers all the data from your form ---
+                const getSelectText = (elId) => { const el = getEl(elId); return el.options[el.selectedIndex].text; };
+                const reportData = {
+                    patientName: getEl('ref-patient-name').value,
+                    medicalNumber: getEl('ref-medical-number').value,
+                    sex: getSelectText('ref-sex'),
+                    age: getEl('age').value,
+                    weight: getEl('weight').value,
+                    burnTime: getEl('burnTime').value.replace('T', ' '),
+                    burnType: getSelectText('burnType'),
+                    burnLocation: getSelectText('ref-burn-location'),
+                    associatedInjuries: getEl('ref-associated-injuries').value,
+                    result1st: getEl('result-1st').textContent,
+                    result2nd: getEl('result-2nd').textContent,
+                    result3rd: getEl('result-3rd').textContent,
+                    totalTbsa: getEl('total-tbsa').textContent,
+                    bauxScore: getEl('baux-score').textContent,
+                    totalFluid: getEl('total-fluid').textContent,
+                    first8hRate: getEl('first-8h-rate').textContent,
+                    next16hRate: getEl('next-16h-rate').textContent,
+                    preHospitalFluids: getEl('preHospitalFluids').value,
+                    medicalHistory: getEl('ref-medical-history').value,
+                    medications: getEl('ref-medications').value,
+                    allergy: getEl('ref-allergy').value,
+                    lastMeal: getEl('ref-last-meal').value,
+                    inhalationSuspected: getEl('inhalation-injury').checked,
+                    facialBurns: getEl('ref-facial-burns').checked,
+                    singedHairs: getEl('ref-singed-hairs').checked,
+                    sootInAirway: getEl('ref-soot').checked,
+                    hoarseness: getEl('ref-hoarseness').checked,
+                    ivLine: getEl('ref-iv-line').checked,
+                    catheter: getEl('ref-catheter').checked,
+                    analgesia: getEl('ref-analgesia').value,
+                    escharotomy: getEl('ref-escharotomy').value,
+                    hospitalName: getEl('ref-hospital-name').value,
+                    physicianName: getEl('ref-physician-name').value
+                };
+
                 try {
+                    // --- This is the new part that sends data to your Worker ---
+                    const WORKER_URL = 'https://burn-report-api.drbishoy.workers.dev/'; // Your URL is here!
+                    const response = await fetch(WORKER_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(reportData)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Server error: The report could not be saved.`);
+                    }
+                    
+                    const result = await response.json();
+                    if (!result.success) {
+                        throw new Error(result.error || 'An unknown error occurred while saving.');
+                    }
+                    
+                    const reportId = result.id; // The new Report ID from our database!
+                    // --- End of the new part ---
+
                     if (typeof window.canvg === 'undefined' || typeof window.canvg.Canvg === 'undefined') {
                         throw new Error('Canvg library not loaded correctly.');
                     }
@@ -879,55 +899,12 @@
                     await v.render();
                     const diagramDataUrl = canvas.toDataURL('image/png');
 
-                    const getSelectText = (elId) => { const el = getEl(elId); return el.options[el.selectedIndex].text; };
-                    
-                    const reportData = {
-                        patientName: getEl('ref-patient-name').value,
-                        medicalNumber: getEl('ref-medical-number').value,
-                        sex: getSelectText('ref-sex'),
-                        age: getEl('age').value,
-                        weight: getEl('weight').value,
-                        burnTime: getEl('burnTime').value.replace('T', ' '),
-                        burnType: getSelectText('burnType'),
-                        burnLocation: getSelectText('ref-burn-location'),
-                        associatedInjuries: getEl('ref-associated-injuries').value,
-                        result1st: getEl('result-1st').textContent,
-                        result2nd: getEl('result-2nd').textContent,
-                        result3rd: getEl('result-3rd').textContent,
-                        totalTbsa: getEl('total-tbsa').textContent,
-                        bauxScore: getEl('baux-score').textContent,
-                        totalFluid: getEl('total-fluid').textContent,
-                        first8hRate: getEl('first-8h-rate').textContent,
-                        next16hRate: getEl('next-16h-rate').textContent,
-                        preHospitalFluids: getEl('preHospitalFluids').value,
-                        medicalHistory: getEl('ref-medical-history').value,
-                        medications: getEl('ref-medications').value,
-                        allergy: getEl('ref-allergy').value,
-                        lastMeal: getEl('ref-last-meal').value,
-                        inhalationSuspected: getEl('inhalation-injury').checked,
-                        facialBurns: getEl('ref-facial-burns').checked,
-                        singedHairs: getEl('ref-singed-hairs').checked,
-                        sootInAirway: getEl('ref-soot').checked,
-                        hoarseness: getEl('ref-hoarseness').checked,
-                        ivLine: getEl('ref-iv-line').checked,
-                        catheter: getEl('ref-catheter').checked,
-                        analgesia: getEl('ref-analgesia').value,
-                        escharotomy: getEl('ref-escharotomy').value,
-                        hospitalName: getEl('ref-hospital-name').value,
-                        physicianName: getEl('ref-physician-name').value,
-                        createdAt: new Date().toISOString()
-                    };
-
-                    // Save to Firebase
-                    const docRef = await window.firebaseAddDoc(window.firebaseCollection(window.firebaseDB, "burn_reports"), reportData);
-                    console.log("Document written with ID: ", docRef.id);
-
                     let inhalationSignsHtml = [
-                        reportData.inhalationSuspected ? '<li>Suspected based on initial form</li>' : '',
-                        reportData.facialBurns ? '<li>Facial Burns noted</li>' : '',
-                        reportData.singedHairs ? '<li>Singed Nasal Hairs noted</li>' : '',
-                        reportData.sootInAirway ? '<li>Soot in Airway noted</li>' : '',
-                        reportData.hoarseness ? '<li>Hoarseness of Voice noted</li>' : ''
+                        reportData.inhalationSuspected ? `<li>${translations[lang].ref_inhalation_title} (Suspected)</li>` : '',
+                        reportData.facialBurns ? `<li>${translations[lang].ref_facial_burns}</li>` : '',
+                        reportData.singedHairs ? `<li>${translations[lang].ref_singed_hairs}</li>` : '',
+                        reportData.sootInAirway ? `<li>${translations[lang].ref_soot}</li>` : '',
+                        reportData.hoarseness ? `<li>${translations[lang].ref_hoarseness}</li>` : ''
                     ].filter(Boolean).join('');
                     if (!inhalationSignsHtml) {
                         inhalationSignsHtml = '<li>No signs of inhalation injury noted.</li>';
@@ -937,7 +914,7 @@
                         <div class="printable-area bg-white text-gray-800 p-6" dir="${lang === 'ar' ? 'rtl' : 'ltr'}">
                              <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4" role="alert">
                                 <p class="font-bold">${translations[lang].report_saved_success}</p>
-                                <p>${docRef.id}</p>
+                                <p>Report ID: ${reportId}</p>
                             </div>
                             <img src="https://pub-fb0d46cb77cb4e22b5863540fe118da4.r2.dev/Plasticology%202025%20Logo%20white%20outline.png" class="watermark" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); opacity: 0.08; pointer-events: none; z-index: 0; width: 80%; max-width: 500px;" />
                             <div style="position: relative; z-index: 1;">
